@@ -26,7 +26,8 @@ Src/IMU/MPU9250.o: ../Src/IMU/MPU9250.c \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Src/IMU/MPU9250.h ../Src/IMU/MPU9250_register.h
+ ../Src/IMU/MPU9250.h ../Src/IMU/MPU9250_register.h \
+ ../Src/IMU/Madgwick/Madgwick.h
 
 C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/i2c.h:
 
@@ -85,3 +86,5 @@ C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Drivers/STM32F1xx_HAL_Driver/I
 ../Src/IMU/MPU9250.h:
 
 ../Src/IMU/MPU9250_register.h:
+
+../Src/IMU/Madgwick/Madgwick.h:

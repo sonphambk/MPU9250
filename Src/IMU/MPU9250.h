@@ -11,12 +11,12 @@
 #include "stdbool.h"
 
 #define SAMPLE_RATE_1khz     7
-#define gyro_sensitivity    16.4   // = 16.4 LSB/degrees/sec
-#define  accel_sensitivity  16384.0      // = 16384 LSB/g
-
-float Accel_x,Accel_y,Accel_z,Gyro_x,Gyro_y,Gyro_z;
-float Accel_x_bias,Accel_y_bias,Accel_z_bias,Gyro_x_bias,Gyro_y_bias,Gyro_z_bias;
-float asax,asay,asaz;
+#define gyro_sensitivity    131.0// 65.5//131.0   // =  LSB/degrees/sec
+#define accel_sensitivity  16384.0//8192.0//16384.0      // =  LSB/g
+#define mag_sensitivity    1.499389499  // Divide raw data by mag_sensitivity to change uT -> mG      raw_Data/(10*4912/32760)
+#define scale_mag		 0.1499389499									   // 1 Micrôtesla [µT] =   10 Miligauss [mG]
+#define alpha           0.99
+#define RAD2DEC			57.29577951
 
 #define MAX_PRECISION	(10)
 static const double rounders[MAX_PRECISION + 1] =
@@ -34,6 +34,20 @@ static const double rounders[MAX_PRECISION + 1] =
 	0.00000000005		// 10
 };
 
+float roll,yaw,pitch;
+uint8_t temp;
+char buff;
+
+int16_t Mag_x,Mag_y,Mag_z;
+
+int16_t Accel_x,Accel_y,Accel_z,Gyro_x,Gyro_y,Gyro_z;
+int32_t Accel_x_bias,Accel_y_bias,Accel_z_bias,Gyro_x_bias,Gyro_y_bias,Gyro_z_bias;
+float asax,asay,asaz;
+float mag_offset[3] ;
+float Accel_X,Accel_Y,Accel_Z,Gyro_X,Gyro_Y,Gyro_Z;
+float Mag_X,Mag_Y,Mag_Z;
+int32_t mag_bias[3] , mag_scale[3];
+float scale_x ,scale_y,scale_z;
 typedef enum{
 	MPU9250_CLOCK_INTERNAL        = 0 <<0 ,
 	MPU9250_CLOCK_PLL_XGYRO       = 1 <<0,
@@ -74,9 +88,14 @@ void init_magnetometer();
 void Process_IMU();
 void Set_Accel_Range(MPU9250_ACCEL_FULL_SCALE accel_FS);
 void Set_Gyro_Range(MPU9250_GYRO_FULL_SCALE gyro_FS);
-bool Check_Connection();
+int Check_Connection(uint8_t return_true_val);
 void mpu9250_set_clock_source(MPU9250_clock_source_t clock_source);
 void Calibration_IMU();
+void Get_magnetometer();
+void Calib_magnetometer();
 void Reset_MPU();
 char * ftoa(double f, char * buf, int precision);
+void Complementary_filter(float Gyro_x,float Gyro_y,float Gyro_z,float  Acc_x,float Acc_y,float Acc_z, float dt);
+void Quaternion_to_EulerAngle(float w,float x,float y,float z);
+
 #endif /* INC_IMU_MPU9250_H_ */

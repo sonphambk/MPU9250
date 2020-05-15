@@ -17,6 +17,7 @@ C_DEPS :=
 SUBDIRS := \
 Drivers/STM32F1xx_HAL_Driver/Src \
 Src/IMU \
+Src/IMU/Madgwick \
 Src \
 startup \
 

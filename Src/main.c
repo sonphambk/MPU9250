@@ -29,6 +29,7 @@
 /* USER CODE BEGIN Includes */
 #include "IMU/MPU9250.h"
 #include "IMU/MPU9250_register.h"
+#include "IMU/Madgwick/Madgwick.h"
 #include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
@@ -52,13 +53,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//#ifdef __GNUC__
-//  /* With GCC, small printf (option LD Linker->Libraries->Small printf
-//     set to 'Yes') calls __io_putchar() */
-//  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-//#else
-//  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-//#endif /* __GNUC__ */
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,6 +70,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 
 		Process_IMU();
+		Quaternion_to_EulerAngle(q0,q1,q2,q3);
 	}
 }
 /* USER CODE END 0 */
@@ -113,40 +109,53 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   init_IMU();
-  //init_magnetometer();
-  Calibration_IMU();
+  uint8_t buf[100]={0};
+  init_magnetometer();
+  if (Check_Connection(0x71) == 1)
+  {
+//	  sprintf((char*)buf,"Value of WHO_I_AM:0x%x\n\r",temp);
+//	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+//	  HAL_UART_Transmit(&huart3,(uint8_t*)"MPU9250 is online...\n\r",24,1000);
+	  Calibration_IMU();
+	  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
+  }
+  else
+  {
+	 // HAL_UART_Transmit(&huart3,(uint8_t*)"check connection...\n",22,1000);
+  }
+
+  Calib_magnetometer();
+//  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
   HAL_TIM_Base_Start_IT(&htim3);
-  uint8_t buf[50];
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	 // Process_IMU();
 
+	///  sprintf((char*)buf,"Accel_x: %.2f  Accel_y: %.2f  Accel_z: %.2f  Gyro_x: %.2f  Gyro_y: %.2f  Gyro_z: %.2f\r\n",Accel_X,Accel_Y,Accel_Z,Gyro_X,Gyro_Y,Gyro_Z);
 
-	//  ftoa(Accel_z,buf,2);
-	//  strcat(buf,"\n");
-	  sprintf((char*)buf,"Accel_X: %.2f \t Accel_Y: %.2f \t Accel_Z: %.2f\n\r",Accel_x,Accel_y,Accel_z);
-	 // sprintf((char*)buf,"Gyro_X: %.2f \t Gyro_Y: %.2f \t Gyro_Z: %.2f\n\r",Gyro_x,Gyro_y,Gyro_z);
+		sprintf((char*)buf,"Scale_X:%.2f  Scale_Y:%.2f  Scale_Z:%.2f\r\n",scale_x,scale_y,scale_z);
+	  //sprintf((char*)buf,"%.2f  %.2f  %.2f\r\n",Mag_X,Mag_Y,Mag_Z);
+		//sprintf((char*)buf,"%.2f  %.2f  %.2f\n",(float)mag_bias[0],(float)mag_bias[1],(float)mag_bias[2]);
+	 // sprintf((char*)buf,"Roll: %.2f  Pitch: %.2f  Yaw: %.2f\n\r",roll,pitch,yaw);
+	// sprintf((char*)buf,"Gyro_X: %.2f \t Gyro_Y: %.2f \t Gyro_Z: %.2f\n\r",Gyro_x,Gyro_y,Gyro_z);
+//	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+	  //sprintf((char*)buf,"Gyro_X_bias: %.2f \t Gyro_Y_bias: %.2f \t Gyro_Z_bias: %.2f\n\r",Gyro_x_bias,Gyro_y_bias,Gyro_z_bias);
+
+	 // sprintf((char*)buf,"%.2f  %.2f  %.2f\n",Mag_x,Mag_y,Mag_z);
 	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
-	//  ftoa(Accel_x,buf,2);
-		//  printf("Accel X: %.2f",Accel_x);
+	  HAL_Delay(10);
+	  sprintf((char*)buf,"asax:%.2f  asay:%.2f  asaz:%.2f\r\n",asax,asay,asaz);
+	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
 	  HAL_Delay(200);
-//	  ftoa(Accel_y,buff,2);
-//	  strcat(buff,": ");
-//	  HAL_UART_Transmit(&huart3,(uint8_t*)buff,strlen(buff),1000);
-//	  ftoa(Accel_z,buff,2);
-//	  strcat(buff,": ");
-//	  HAL_UART_Transmit(&huart3,(uint8_t*)buff,strlen(buff),1000);
 
 
-//	  while(HAL_UART_Transmit(&huart3,(uint8_t*)buff,strlen(buff),1000) == HAL_OK)
-//	  {
-//		  HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
-//		  HAL_Delay(1000);
-//	  }
+
+
 
     /* USER CODE END WHILE */
 

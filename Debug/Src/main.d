@@ -30,7 +30,8 @@ Src/main.o: ../Src/main.c \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/tim.h \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/usart.h \
  C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/gpio.h \
- ../Src/IMU/MPU9250.h ../Src/IMU/MPU9250_register.h
+ ../Src/IMU/MPU9250.h ../Src/IMU/MPU9250_register.h \
+ ../Src/IMU/Madgwick/Madgwick.h
 
 C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/main.h:
 
@@ -97,3 +98,5 @@ C:/Users/PC/Desktop/New\ folder/STM32/IMU/MPU9250/Inc/gpio.h:
 ../Src/IMU/MPU9250.h:
 
 ../Src/IMU/MPU9250_register.h:
+
+../Src/IMU/Madgwick/Madgwick.h:
