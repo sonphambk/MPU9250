@@ -393,20 +393,10 @@ void Get_magnetometer()
 			Mag_z = (int16_t)((raw_data[5]<<8) | raw_data[4] );
 		}
 
-//		uint8_t magbias[3];
-//		 magbias[0] = +470.;  // User environmental x-axis correction in milliGauss, should be automatically calculated
-//		 magbias[1] = +120.;  // User environmental x-axis correction in milliGauss
-//		 magbias[2] = +125.;
-		//convert uT --> mG
-//		Mag_x = Mag_x*asax*mag_sensitivity*scale_x;
-//		Mag_y = Mag_y*asay*mag_sensitivity*scale_y;
-//		Mag_z = Mag_z*asaz*mag_sensitivity*scale_z;
-//		Mag_x = (Mag_x-mag_bias[0])*asax*scale_mag;
-//		Mag_y = (Mag_y-mag_bias[1])*asay*scale_mag;
-//		Mag_z = (Mag_z-mag_bias[2])*asaz*scale_mag;
-		Mag_X = ((float)Mag_x * asax * mag_sensitivity - mag_offset[0])*scale_x;
-		Mag_Y = ((float)Mag_y * asay * mag_sensitivity - mag_offset[1])*scale_y;
-		Mag_Z = ((float)Mag_z * asaz * mag_sensitivity - mag_offset[2])*scale_z;
+
+//		Mag_X = ((float)Mag_x * asax * mag_sensitivity - mag_offset[0])*scale_x;
+//		Mag_Y = ((float)Mag_y * asay * mag_sensitivity - mag_offset[1])*scale_y;
+//		Mag_Z = ((float)Mag_z * asaz * mag_sensitivity - mag_offset[2])*scale_z;
 	}
 }
 void Calib_magnetometer()

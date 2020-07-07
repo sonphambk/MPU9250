@@ -126,7 +126,7 @@ int main(void)
 	 // HAL_UART_Transmit(&huart3,(uint8_t*)"check connection...\n",22,1000);
   }
 
-  Calib_magnetometer();
+ Calib_magnetometer();
 //  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
   HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
@@ -138,19 +138,19 @@ int main(void)
 
 	///  sprintf((char*)buf,"Accel_x: %.2f  Accel_y: %.2f  Accel_z: %.2f  Gyro_x: %.2f  Gyro_y: %.2f  Gyro_z: %.2f\r\n",Accel_X,Accel_Y,Accel_Z,Gyro_X,Gyro_Y,Gyro_Z);
 
-		sprintf((char*)buf,"Scale_X:%.2f  Scale_Y:%.2f  Scale_Z:%.2f\r\n",scale_x,scale_y,scale_z);
-	  //sprintf((char*)buf,"%.2f  %.2f  %.2f\r\n",Mag_X,Mag_Y,Mag_Z);
+		//sprintf((char*)buf,"Scale_X:%.2f  Scale_Y:%.2f  Scale_Z:%.2f\r\n",scale_x,scale_y,scale_z);
+	  //sprintf((char*)buf,"%d  %d  %d\r\n",Mag_x,Mag_y,Mag_z);
 		//sprintf((char*)buf,"%.2f  %.2f  %.2f\n",(float)mag_bias[0],(float)mag_bias[1],(float)mag_bias[2]);
-	 // sprintf((char*)buf,"Roll: %.2f  Pitch: %.2f  Yaw: %.2f\n\r",roll,pitch,yaw);
+	  sprintf((char*)buf,"Roll: %.2f  Pitch: %.2f  Yaw: %.2f\n\r",roll,pitch,yaw);
 	// sprintf((char*)buf,"Gyro_X: %.2f \t Gyro_Y: %.2f \t Gyro_Z: %.2f\n\r",Gyro_x,Gyro_y,Gyro_z);
-//	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
 	  //sprintf((char*)buf,"Gyro_X_bias: %.2f \t Gyro_Y_bias: %.2f \t Gyro_Z_bias: %.2f\n\r",Gyro_x_bias,Gyro_y_bias,Gyro_z_bias);
 
 	 // sprintf((char*)buf,"%.2f  %.2f  %.2f\n",Mag_x,Mag_y,Mag_z);
-	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
-	  HAL_Delay(10);
-	  sprintf((char*)buf,"asax:%.2f  asay:%.2f  asaz:%.2f\r\n",asax,asay,asaz);
-	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+//	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,strlen(buf),1000);
+//	  HAL_Delay(10);
+//	  sprintf((char*)buf,"asax:%.2f  asay:%.2f  asaz:%.2f\r\n",asax,asay,asaz);
+	  //HAL_UART_Transmit(&huart3,(uint8_t*)mess,(sizeof(mess)),1000);
 	  HAL_Delay(200);
 
 
