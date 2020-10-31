@@ -8,6 +8,7 @@
 #include "MPU9250.h"
 #include "MPU9250_register.h"
 #include "Madgwick/Madgwick.h"
+#include "Kalman/kalman.h"
 #include "stm32f1xx_hal.h"
 #include "stdbool.h"
 #include "stdio.h"
@@ -130,7 +131,7 @@ void init_IMU()
 
 	//CONGFIG
 	d[0] = CONFIG;
-	d[1] = 0x00;//0x05
+	d[1] = 0x09;//0x05//0x03
 	while(HAL_I2C_Master_Transmit(&hi2c1,(uint16_t)mpu_address,(uint8_t *)d,2,100) != HAL_OK);
 
 	/* Set data sample rate */
@@ -226,20 +227,23 @@ void Process_IMU()
 	Gyro_z = (int16_t)((int16_t)( data[12] << 8 ) | data[13]);
 
 
-	Accel_X = (float)((int32_t)Accel_x - Accel_x_bias)/(float)accel_sensitivity;
-	Accel_Y =  (float)((int32_t)Accel_y - Accel_y_bias)/(float)accel_sensitivity;
-	Accel_Z =  (float)((int32_t)Accel_z - Accel_z_bias)/(float)accel_sensitivity ;
+	Accel_X = 10*(float)((int32_t)Accel_x - Accel_x_bias)/(float)accel_sensitivity;
+	Accel_Y = 10*(float)((int32_t)Accel_y - Accel_y_bias)/(float)accel_sensitivity;
+	Accel_Z =  10*(float)((int32_t)Accel_z - Accel_z_bias)/(float)accel_sensitivity ;
 
-	Gyro_X =  (float)((int32_t)Gyro_x - Gyro_x_bias)/(float)gyro_sensitivity;
-	Gyro_Y =  (float)((int32_t)Gyro_y - Gyro_y_bias)/(float)gyro_sensitivity;
-	Gyro_Z =  (float)((int32_t)Gyro_z - Gyro_z_bias)/(float)gyro_sensitivity;
+	Gyro_X =  (float)(((int32_t)Gyro_x - Gyro_x_bias)/(float)gyro_sensitivity)*M_PI/180.0f;
+	Gyro_Y =  (float)(((int32_t)Gyro_y - Gyro_y_bias)/(float)gyro_sensitivity)*M_PI/180.0f;
+	Gyro_Z =  (float)(((int32_t)Gyro_z - Gyro_z_bias)/(float)gyro_sensitivity)*M_PI/180.0f;
 
 	// Get data of Magnetometer
 	Get_magnetometer();
+	//yaw = atan2(Accel_x,Accel_y) * RAD2DEC;
+	//new_yaw = get_kalman_angle(yaw,Gyro_z/gyro_sensitivity,0.01);
+	MadgwickAHRSupdateIMU(Gyro_X,Gyro_Y,Gyro_Z,Accel_X,Accel_Y,Accel_Z);
+	//MadgwickAHRSupdate(Gyro_X*M_PI/180.0f,Gyro_Y*M_PI/180.0f,Gyro_Z*M_PI/180.0f,Accel_X,Accel_Y,Accel_Z,Mag_X_calib,Mag_Y_calib,-Mag_Z_calib);
+	//MadgwickQuaternionUpdate(-Accel_X,Accel_Y,Accel_Z, Gyro_X*M_PI/180.0f,-Gyro_Y*M_PI/180.0f,-Gyro_Z*M_PI/180.0f, Mag_Y_calib,-Mag_X_calib,Mag_Z_calib);
+	//MahonyAHRSupdate(Gyro_X*M_PI/180.0f,-Gyro_Y*M_PI/180.0f,-Gyro_Z*M_PI/180.0f,Accel_X,-Accel_Y,-Accel_Z,Mag_Y_calib,-Mag_X_calib,Mag_Z_calib);
 
-	//MadgwickAHRSupdateIMU(Gyro_X*M_PI/180.0f,Gyro_Y*M_PI/180.0f,Gyro_Z*M_PI/180.0f,Accel_X,Accel_Y,Accel_Z);
-	MadgwickAHRSupdate(Gyro_X*M_PI/180.0f,Gyro_Y*M_PI/180.0f,Gyro_Z*M_PI/180.0f,Accel_X,Accel_Y,Accel_Z,Mag_X,Mag_Y,Mag_Z);
-	//MahonyAHRSupdate(Gyro_X*M_PI/180.0f,Gyro_Y*M_PI/180.0f,Gyro_Z*M_PI/180.0f,Accel_X,Accel_Y,Accel_Z,Mag_X,Mag_Y,Mag_Z);
 
 }
 void Set_Accel_Range(MPU9250_ACCEL_FULL_SCALE accel_FS)
@@ -394,16 +398,24 @@ void Get_magnetometer()
 		}
 
 
-//		Mag_X = ((float)Mag_x * asax * mag_sensitivity - mag_offset[0])*scale_x;
-//		Mag_Y = ((float)Mag_y * asay * mag_sensitivity - mag_offset[1])*scale_y;
-//		Mag_Z = ((float)Mag_z * asaz * mag_sensitivity - mag_offset[2])*scale_z;
+		Mag_X_calib = (float)Mag_x * asax * mag_sensitivity - mag_offset[0];
+		Mag_Y_calib = (float)Mag_y * asay * mag_sensitivity - mag_offset[1];
+		Mag_Z_calib = (float)Mag_z * asaz * mag_sensitivity - mag_offset[2];
+
+		Mag_X_calib *=scale_x;
+		Mag_Y_calib *=scale_y;
+		Mag_Z_calib *=scale_z;
+
 	}
 }
 void Calib_magnetometer()
 {
-	int16_t mag_max[3] = {-32767, -32767, -32767}, mag_min[3] = {32767, 32767, 32767};
-	uint8_t raw_data[7];
+	//int16_t mag_max[3] = {-32767, -32767, -32767}, mag_min[3] = {32767, 32767, 32767};
+
+	//int16_t mag_max[3] = {344.0,392.0,51.0},mag_min[3] = {-115.0,24.0,-323.0};
+	int16_t mag_max[3] = { 332.0,377.0, 61.0},mag_min[3] = {-21.0,25.0,-304.0};
 	mag_offset[3] = 0;
+	/*uint8_t raw_data[7];
 	uint8_t reg_ST1 = ST1;
 	uint8_t mag_address = MAG_ADDRESS_DEFAULT;
 	uint8_t reg = XOUT_L;
@@ -431,7 +443,7 @@ void Calib_magnetometer()
 		if (mag_temp[j] < mag_min[j])  mag_min[j] = mag_temp[j];
 	}
 		HAL_Delay(12);
-	}
+	}*/
 	// Get hard iron correction
 	mag_bias[0] = (mag_max[0] + mag_min[0])/2;
 	mag_bias[1] = (mag_max[1] + mag_min[1])/2;
@@ -449,13 +461,9 @@ void Calib_magnetometer()
 	float avg_rad = mag_scale[0] + mag_scale[1] + mag_scale[2];
 	avg_rad /= 3.0;
 
-
 	scale_x = avg_rad/(float)mag_scale[0];    //1.14
 	scale_y = avg_rad/(float)mag_scale[1];  // 1.00
 	scale_z = avg_rad/(float)mag_scale[2]; // 0.89
-
-
-
 }
 void Quaternion_to_EulerAngle(float w,float x,float y,float z)
 {

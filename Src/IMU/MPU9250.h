@@ -14,7 +14,7 @@
 #define gyro_sensitivity    131.0// 65.5//131.0   // =  LSB/degrees/sec
 #define accel_sensitivity  16384.0//8192.0//16384.0      // =  LSB/g
 #define mag_sensitivity    1.499389499  // Divide raw data by mag_sensitivity to change uT -> mG      raw_Data/(10*4912/32760)
-#define scale_mag		 0.1499389499									   // 1 Micrôtesla [µT] =   10 Miligauss [mG]
+#define scale_mag		 0.1499389499									   // 1 Micrï¿½tesla [ï¿½T] =   10 Miligauss [mG]
 #define alpha           0.99
 #define RAD2DEC			57.29577951
 
@@ -45,7 +45,7 @@ int32_t Accel_x_bias,Accel_y_bias,Accel_z_bias,Gyro_x_bias,Gyro_y_bias,Gyro_z_bi
 float asax,asay,asaz;
 float mag_offset[3] ;
 float Accel_X,Accel_Y,Accel_Z,Gyro_X,Gyro_Y,Gyro_Z;
-float Mag_X,Mag_Y,Mag_Z;
+float Mag_X_calib,Mag_Y_calib,Mag_Z_calib;
 int32_t mag_bias[3] , mag_scale[3];
 float scale_x ,scale_y,scale_z;
 typedef enum{
@@ -59,17 +59,17 @@ typedef enum{
 }MPU9250_clock_source_t;
 
 typedef enum{
-	MPU9250_GYRO_FS_250       =  0 <<3,  //0x00   // ± 250 °/s
-	MPU9250_GYRO_FS_500       =  1 << 3,// 0x08   // ± 500 °/s
-	MPU9250_GYRO_FS_1000      =  2 << 3,// 0x10   // ± 1000 °/s
-	MPU9250_GYRO_FS_2000      =  3 << 3,// 0x18	  // ± 2000 °/s
+	MPU9250_GYRO_FS_250       =  0 << 3,  //0x00   // ï¿½ 250 ï¿½/s
+	MPU9250_GYRO_FS_500       =  1 << 3,// 0x08   // ï¿½ 500 ï¿½/s
+	MPU9250_GYRO_FS_1000      =  2 << 3,// 0x10   // ï¿½ 1000 ï¿½/s
+	MPU9250_GYRO_FS_2000      =  3 << 3,// 0x18	  // ï¿½ 2000 ï¿½/s
 }MPU9250_GYRO_FULL_SCALE;
 
 typedef enum{
-	MPU9250_ACCEL_FS_2        =  0 <<3,//  0x00   // ± 2g
-	MPU9250_ACCEL_FS_4        =  1 << 3,// 0x08   // ± 4g
-	MPU9250_ACCEL_FS_8        =  2 << 3,// 0x10   // ± 8g
-	MPU9250_ACCEL_FS_16       =  3 << 3,// 0x18  // ± 16g
+	MPU9250_ACCEL_FS_2        =  0 <<3,//  0x00   // ï¿½ 2g
+	MPU9250_ACCEL_FS_4        =  1 << 3,// 0x08   // ï¿½ 4g
+	MPU9250_ACCEL_FS_8        =  2 << 3,// 0x10   // ï¿½ 8g
+	MPU9250_ACCEL_FS_16       =  3 << 3,// 0x18  // ï¿½ 16g
 }MPU9250_ACCEL_FULL_SCALE;
 typedef enum{
 	MFS_14BITS	= 0,

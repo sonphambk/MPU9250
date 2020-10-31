@@ -38,6 +38,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+#define pi 3.141592653589793238462
+float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};
+float a12, a22, a31, a32, a33;
+uint8_t buf[100]={0};
 
 /* USER CODE END PTD */
 
@@ -66,11 +70,34 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM3)
+	if (htim->Instance == TIM1)
 	{
-
+		//Get_magnetometer();
 		Process_IMU();
-		Quaternion_to_EulerAngle(q0,q1,q2,q3);
+
+		q[0] = q0;
+		q[1] = q1;
+		q[2] = q2;
+		q[3] = q3;
+		a12 =   2.0f * (q[1] * q[2] + q[0] * q[3]);
+		a22 =   q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3];
+		a31 =   2.0f * (q[0] * q[1] + q[2] * q[3]);
+		a32 =   2.0f * (q[1] * q[3] - q[0] * q[2]);
+		a33 =   q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3];
+		float sinp = a32;
+		if (abs(sinp) >= 1)
+			pitch = copysign(M_PI/2,sinp);
+		else
+			pitch =  asin(sinp);
+		//pitch = -asinf(a32);
+		roll  = atan2f(a31, a33);
+		yaw   = atan2f(a12, a22);
+		pitch *= 180.0f / pi;
+		yaw = atan2f(sinf(yaw),cosf(yaw));
+		yaw   *= 180.0f / pi;
+
+		roll  *= 180.0f / pi;
+
 	}
 }
 /* USER CODE END 0 */
@@ -106,10 +133,10 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART3_UART_Init();
+  MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   init_IMU();
-  uint8_t buf[100]={0};
   init_magnetometer();
   if (Check_Connection(0x71) == 1)
   {
@@ -117,41 +144,50 @@ int main(void)
 //	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
 //	  HAL_UART_Transmit(&huart3,(uint8_t*)"MPU9250 is online...\n\r",24,1000);
 	  Calibration_IMU();
-	  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
 	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_RESET);
+
   }
   else
   {
 	 // HAL_UART_Transmit(&huart3,(uint8_t*)"check connection...\n",22,1000);
   }
 
- Calib_magnetometer();
+  Calib_magnetometer();
 //  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_13,GPIO_PIN_SET);
   HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim1);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  //dt = 0.00055;
 
-	///  sprintf((char*)buf,"Accel_x: %.2f  Accel_y: %.2f  Accel_z: %.2f  Gyro_x: %.2f  Gyro_y: %.2f  Gyro_z: %.2f\r\n",Accel_X,Accel_Y,Accel_Z,Gyro_X,Gyro_Y,Gyro_Z);
+	  // max = 339  360  10
+//		min  -40  -17  -412
+	 // sprintf((char*)buf,"%.2f  %.2f  %.2f\r\n",Gyro_X,Gyro_Y,Gyro_Z);
 
 		//sprintf((char*)buf,"Scale_X:%.2f  Scale_Y:%.2f  Scale_Z:%.2f\r\n",scale_x,scale_y,scale_z);
-	  //sprintf((char*)buf,"%d  %d  %d\r\n",Mag_x,Mag_y,Mag_z);
+	  //sprintf((char*)buf,"%.3f  %.3f  %.3f\r\n",Mag_X_calib,Mag_Y_calib,Mag_Z_calib);
 		//sprintf((char*)buf,"%.2f  %.2f  %.2f\n",(float)mag_bias[0],(float)mag_bias[1],(float)mag_bias[2]);
-	  sprintf((char*)buf,"Roll: %.2f  Pitch: %.2f  Yaw: %.2f\n\r",roll,pitch,yaw);
-	// sprintf((char*)buf,"Gyro_X: %.2f \t Gyro_Y: %.2f \t Gyro_Z: %.2f\n\r",Gyro_x,Gyro_y,Gyro_z);
-	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+
+	 // sprintf((char*)buf,"yaw_kalman: %.2f\n\r",new_yaw);
+	  //sprintf((char*)buf,"qo:%.5f  q1:%.5f  q2:%.5f  q3:%.5f\r\n",q[0],q[1],q[2],q[3]);
+	  //sprintf((char*)buf,"qo:%.5f  q1:%.5f  q2:%.5f  q3:%.5f\r\n",q0,q1,q2,q3);
+	//  sprintf((char*)buf,"%d  %.d  %d\r\n",Mag_x,Mag_y,Mag_z);
+
 	  //sprintf((char*)buf,"Gyro_X_bias: %.2f \t Gyro_Y_bias: %.2f \t Gyro_Z_bias: %.2f\n\r",Gyro_x_bias,Gyro_y_bias,Gyro_z_bias);
 
-	 // sprintf((char*)buf,"%.2f  %.2f  %.2f\n",Mag_x,Mag_y,Mag_z);
 //	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,strlen(buf),1000);
 //	  HAL_Delay(10);
-//	  sprintf((char*)buf,"asax:%.2f  asay:%.2f  asaz:%.2f\r\n",asax,asay,asaz);
 	  //HAL_UART_Transmit(&huart3,(uint8_t*)mess,(sizeof(mess)),1000);
-	  HAL_Delay(200);
+	  sprintf((char*)buf,"%.2f  %.2f  %.2f\r\n",roll,pitch,yaw);
+	  HAL_UART_Transmit(&huart3,(uint8_t*)buf,sizeof(buf),1000);
+
+	  HAL_Delay(100);
 
 
 
